@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Collections;
 using System.Reflection;
 
-namespace Edument.CQRS
+namespace Cafe.Core
 {
     /// <summary>
     /// This implements a basic message dispatcher, driving the overall command handling
@@ -15,11 +14,9 @@ namespace Edument.CQRS
     /// </summary>
     public class MessageDispatcher
     {
-        private Dictionary<Type, Action<object>> commandHandlers =
-            new Dictionary<Type, Action<object>>();      
-        private Dictionary<Type, List<Action<object>>> eventSubscribers =
-            new Dictionary<Type, List<Action<object>>>();
-        private IEventStore eventStore;
+        private readonly Dictionary<Type, Action<object>> _commandHandlers = new Dictionary<Type, Action<object>>();
+        private readonly Dictionary<Type, List<Action<object>>> _eventSubscribers = new Dictionary<Type, List<Action<object>>>();
+        private readonly IEventStore _eventStore;
 
         /// <summary>
         /// Initializes a message dispatcher, which will use the specified event store
@@ -28,7 +25,7 @@ namespace Edument.CQRS
         /// <param name="es"></param>
         public MessageDispatcher(IEventStore es)
         {
-            eventStore = es;
+            _eventStore = es;
         }
 
         /// <summary>
@@ -39,10 +36,14 @@ namespace Edument.CQRS
         /// <param name="c"></param>
         public void SendCommand<TCommand>(TCommand c)
         {
-            if (commandHandlers.ContainsKey(typeof(TCommand)))
-                commandHandlers[typeof(TCommand)](c);
+            if (_commandHandlers.ContainsKey(typeof (TCommand)))
+            {
+                _commandHandlers[typeof (TCommand)](c);
+            }
             else
-                throw new Exception("No command handler registered for " + typeof(TCommand).Name);
+            {
+                throw new Exception("No command handler registered for " + typeof (TCommand).Name);
+            }
         }
 
         /// <summary>
@@ -52,9 +53,14 @@ namespace Edument.CQRS
         private void PublishEvent(object e)
         {
             var eventType = e.GetType();
-            if (eventSubscribers.ContainsKey(eventType))
-                foreach (var sub in eventSubscribers[eventType])
+
+            if (_eventSubscribers.ContainsKey(eventType))
+            {
+                foreach (var sub in _eventSubscribers[eventType])
+                {
                     sub(e);
+                }
+            }
         }
 
         /// <summary>
@@ -62,37 +68,43 @@ namespace Edument.CQRS
         /// command.
         /// </summary>
         /// <typeparam name="TAggregate"></typeparam>
-        /// <param name="handler"></param>
-        public void AddHandlerFor<TCommand, TAggregate>()
-            where TAggregate : Aggregate, new()
+        /// <typeparam name="TCommand"></typeparam>
+        public void AddHandlerFor<TCommand, TAggregate>() where TAggregate : Aggregate, new()
         {
-            if (commandHandlers.ContainsKey(typeof(TCommand)))
-                throw new Exception("Command handler already registered for " + typeof(TCommand).Name);
-            
-            commandHandlers.Add(typeof(TCommand), c =>
-                {
-                    // Create an empty aggregate.
-                    var agg = new TAggregate();
+            if (_commandHandlers.ContainsKey(typeof (TCommand)))
+            {
+                throw new Exception("Command handler already registered for " + typeof (TCommand).Name);
+            }
 
-                    // Load the aggregate with events.
-                    agg.Id = ((dynamic)c).Id;
-                    agg.ApplyEvents(eventStore.LoadEventsFor<TAggregate>(agg.Id));
-                    
-                    // With everything set up, we invoke the command handler, collecting the
-                    // events that it produces.
-                    var resultEvents = new ArrayList();
-                    foreach (var e in (agg as IHandleCommand<TCommand>).Handle((TCommand)c))
-                        resultEvents.Add(e);
-                    
-                    // Store the events in the event store.
-                    if (resultEvents.Count > 0)
-                        eventStore.SaveEventsFor<TAggregate>(agg.Id,
-                            agg.EventsLoaded, resultEvents);
+            _commandHandlers.Add(typeof (TCommand),
+                                 c =>
+                                 {
+                                     // Create an empty aggregate.
+                                     var agg = new TAggregate {Id = ((dynamic) c).Id};
 
-                    // Publish them to all subscribers.
-                    foreach (var e in resultEvents)
-                        PublishEvent(e);
-                });
+                                     // Load the aggregate with events.
+                                     agg.ApplyEvents(_eventStore.LoadEventsFor<TAggregate>(agg.Id));
+
+                                     // With everything set up, we invoke the command handler, collecting the
+                                     // events that it produces.
+                                     var resultEvents = new ArrayList();
+                                     foreach (var e in (agg as IHandleCommand<TCommand>).Handle((TCommand) c))
+                                     {
+                                         resultEvents.Add(e);
+                                     }
+
+                                     // Store the events in the event store.
+                                     if (resultEvents.Count > 0)
+                                     {
+                                         _eventStore.SaveEventsFor<TAggregate>(agg.Id, agg.EventsLoaded, resultEvents);
+                                     }
+
+                                     // Publish them to all subscribers.
+                                     foreach (var e in resultEvents)
+                                     {
+                                         PublishEvent(e);
+                                     }
+                                 });
         }
 
         /// <summary>
@@ -103,10 +115,12 @@ namespace Edument.CQRS
         /// <param name="subscriber"></param>
         public void AddSubscriberFor<TEvent>(ISubscribeTo<TEvent> subscriber)
         {
-            if (!eventSubscribers.ContainsKey(typeof(TEvent)))
-                eventSubscribers.Add(typeof(TEvent), new List<Action<object>>());
-            eventSubscribers[typeof(TEvent)].Add(e =>
-                subscriber.Handle((TEvent)e));
+            if (!_eventSubscribers.ContainsKey(typeof (TEvent)))
+            {
+                _eventSubscribers.Add(typeof (TEvent), new List<Action<object>>());
+            }
+
+            _eventSubscribers[typeof (TEvent)].Add(e => subscriber.Handle((TEvent) e));
         }
 
         /// <summary>
@@ -118,37 +132,40 @@ namespace Edument.CQRS
         public void ScanAssembly(Assembly ass)
         {
             // Scan for and register handlers.
-            var handlers = 
-                from t in ass.GetTypes()
-                from i in t.GetInterfaces()
-                where i.IsGenericType
-                where i.GetGenericTypeDefinition() == typeof(IHandleCommand<>)
-                let args = i.GetGenericArguments()
-                select new
-                {
-                    CommandType = args[0],
-                    AggregateType = t
-                };
+            var handlers = from t in ass.GetTypes()
+                           from i in t.GetInterfaces()
+                           where i.IsGenericType
+                           where i.GetGenericTypeDefinition() == typeof (IHandleCommand<>)
+                           let args = i.GetGenericArguments()
+                           select new
+                                  {
+                                      CommandType = args[0],
+                                      AggregateType = t
+                                  };
+
             foreach (var h in handlers)
-                this.GetType().GetMethod("AddHandlerFor") 
-                    .MakeGenericMethod(h.CommandType, h.AggregateType)
-                    .Invoke(this, new object[] { });
+            {
+                GetType().GetMethod("AddHandlerFor")
+                         .MakeGenericMethod(h.CommandType, h.AggregateType)
+                         .Invoke(this, new object[] {});
+            }
 
             // Scan for and register subscribers.
-            var subscriber =
-                from t in ass.GetTypes()
-                from i in t.GetInterfaces()
-                where i.IsGenericType
-                where i.GetGenericTypeDefinition() == typeof(ISubscribeTo<>)
-                select new
-                {
-                    Type = t,
-                    EventType = i.GetGenericArguments()[0]
-                };
+            var subscriber = from t in ass.GetTypes()
+                             from i in t.GetInterfaces()
+                             where i.IsGenericType
+                             where i.GetGenericTypeDefinition() == typeof (ISubscribeTo<>)
+                             select new
+                                    {
+                                        Type = t,
+                                        EventType = i.GetGenericArguments()[0]
+                                    };
             foreach (var s in subscriber)
-                this.GetType().GetMethod("AddSubscriberFor")
-                    .MakeGenericMethod(s.EventType)
-                    .Invoke(this, new object[] { CreateInstanceOf(s.Type) });
+            {
+                GetType().GetMethod("AddSubscriberFor")
+                         .MakeGenericMethod(s.EventType)
+                         .Invoke(this, new object[] {CreateInstanceOf(s.Type)});
+            }
         }
 
         /// <summary>
@@ -159,31 +176,35 @@ namespace Edument.CQRS
         public void ScanInstance(object instance)
         {
             // Scan for and register handlers.
-            var handlers =
-                from i in instance.GetType().GetInterfaces()
-                where i.IsGenericType
-                where i.GetGenericTypeDefinition() == typeof(IHandleCommand<>)
-                let args = i.GetGenericArguments()
-                select new
-                {
-                    CommandType = args[0],
-                    AggregateType = instance.GetType()
-                };
+            var handlers = from i in instance.GetType().GetInterfaces()
+                           where i.IsGenericType
+                           where i.GetGenericTypeDefinition() == typeof (IHandleCommand<>)
+                           let args = i.GetGenericArguments()
+                           select new
+                                  {
+                                      CommandType = args[0],
+                                      AggregateType = instance.GetType()
+                                  };
+
             foreach (var h in handlers)
-                this.GetType().GetMethod("AddHandlerFor")
-                    .MakeGenericMethod(h.CommandType, h.AggregateType)
-                    .Invoke(this, new object[] { });
+            {
+                GetType().GetMethod("AddHandlerFor")
+                         .MakeGenericMethod(h.CommandType, h.AggregateType)
+                         .Invoke(this, new object[] {});
+            }
 
             // Scan for and register subscribers.
-            var subscriber =
-                from i in instance.GetType().GetInterfaces()
-                where i.IsGenericType
-                where i.GetGenericTypeDefinition() == typeof(ISubscribeTo<>)
-                select i.GetGenericArguments()[0];
+            var subscriber = from i in instance.GetType().GetInterfaces()
+                             where i.IsGenericType
+                             where i.GetGenericTypeDefinition() == typeof (ISubscribeTo<>)
+                             select i.GetGenericArguments()[0];
+
             foreach (var s in subscriber)
-                this.GetType().GetMethod("AddSubscriberFor")
-                    .MakeGenericMethod(s)
-                    .Invoke(this, new object[] { instance });
+            {
+                GetType().GetMethod("AddSubscriberFor")
+                         .MakeGenericMethod(s)
+                         .Invoke(this, new object[] {instance});
+            }
         }
 
         /// <summary>

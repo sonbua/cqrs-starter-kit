@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6F605353-EDF1-4EC1-900C-4C55C105E24C}</ProjectGuid>
+    <ProjectGuid>{FE7E5277-0F2B-4CC8-81B7-87AB78AF0D18}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CafeReadModels</RootNamespace>
-    <AssemblyName>CafeReadModels</AssemblyName>
+    <RootNamespace>Cafe.Tests</RootNamespace>
+    <AssemblyName>Cafe.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,30 +31,45 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.mocks, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.mocks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="pnunit.framework, Version=1.0.4109.34242, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\pnunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChefTodoList.cs" />
-    <Compile Include="IChefTodoListQueries.cs" />
-    <Compile Include="IOpenTabQueries.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="OpenTabs.cs" />
+    <Compile Include="TabTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Edument.CQRS\Edument.CQRS.csproj">
+    <ProjectReference Include="..\Cafe.Infrastructure\Cafe.Infrastructure.csproj">
+      <Project>{f403e01d-1fa6-4929-8f3e-ff913862290d}</Project>
+      <Name>Cafe.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Cafe\Cafe.Commands.csproj">
+      <Project>{93C9E435-6BF0-4A40-98FA-2BDFFF04F506}</Project>
+      <Name>Cafe.Commands</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Edument.CQRS\Cafe.Core.csproj">
       <Project>{D2BAB57D-225D-4F4C-9410-ED39495A8FE0}</Project>
-      <Name>Edument.CQRS</Name>
+      <Name>Cafe.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Events\Events.csproj">
+    <ProjectReference Include="..\Events\Cafe.Events.csproj">
       <Project>{36635EE7-A3B5-4F39-8AF8-3625F6BBE43D}</Project>
-      <Name>Events</Name>
+      <Name>Cafe.Events</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

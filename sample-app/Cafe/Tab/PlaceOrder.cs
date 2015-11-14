@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Events.Cafe;
+using Cafe.Events.Tab;
 
-namespace Cafe.Tab
+namespace Cafe.Commands.Tab
 {
     public class PlaceOrder
     {
         public Guid Id;
+
         public List<OrderedItem> Items;
     }
 }

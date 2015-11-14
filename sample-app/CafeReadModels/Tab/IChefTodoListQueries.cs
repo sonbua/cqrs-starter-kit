@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace CafeReadModels
+namespace Cafe.ReadModels.Tab
 {
     public interface IChefTodoListQueries
     {

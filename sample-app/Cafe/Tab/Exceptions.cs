@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Cafe.Tab
+namespace Cafe.Commands.Tab
 {
     public class TabNotOpen : Exception
     {

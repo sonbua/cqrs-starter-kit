@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
-namespace WebFrontend.ActionFilters
+namespace Cafe.Web.ActionFilters
 {
     public class IncludeLayoutDataAttribute : ActionFilterAttribute
     {
         public override void OnResultExecuting(ResultExecutingContext filterContext)
         {
-            if (filterContext.Result is ViewResult)
+            var viewResult = filterContext.Result as ViewResult;
+
+            if (viewResult != null)
             {
-                var bag = (filterContext.Result as ViewResult).ViewBag;
+                var bag = viewResult.ViewBag;
                 bag.WaitStaff = StaticData.WaitStaff;
                 bag.ActiveTables = Domain.OpenTabQueries.ActiveTableNumbers();
             }

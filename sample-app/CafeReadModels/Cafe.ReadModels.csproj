@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D2BAB57D-225D-4F4C-9410-ED39495A8FE0}</ProjectGuid>
+    <ProjectGuid>{6F605353-EDF1-4EC1-900C-4C55C105E24C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Edument.CQRS</RootNamespace>
-    <AssemblyName>Edument.CQRS</AssemblyName>
+    <RootNamespace>Cafe.ReadModels</RootNamespace>
+    <AssemblyName>Cafe.ReadModels</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,40 +31,25 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.mocks, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.mocks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="pnunit.framework, Version=1.0.4109.34242, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.5.10.11092\lib\pnunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Aggregate.cs" />
-    <Compile Include="BDDTest.cs" />
-    <Compile Include="InMemoryEventStore.cs" />
-    <Compile Include="SqlEventStore.cs" />
-    <Compile Include="IApplyEvent.cs" />
-    <Compile Include="IEventStore.cs" />
-    <Compile Include="IHandleCommand.cs" />
-    <Compile Include="ISubscribeTo.cs" />
-    <Compile Include="MessageDispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tab\ChefTodoList.cs" />
+    <Compile Include="Tab\IChefTodoListQueries.cs" />
+    <Compile Include="Tab\IOpenTabQueries.cs" />
+    <Compile Include="Tab\OpenTabs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\Edument.CQRS\Cafe.Core.csproj">
+      <Project>{D2BAB57D-225D-4F4C-9410-ED39495A8FE0}</Project>
+      <Name>Cafe.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Events\Cafe.Events.csproj">
+      <Project>{36635EE7-A3B5-4F39-8AF8-3625F6BBE43D}</Project>
+      <Name>Cafe.Events</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

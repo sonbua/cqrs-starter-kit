@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Cafe.Tab;
-using WebFrontend.ActionFilters;
-using WebFrontend.Models;
 using System.Text.RegularExpressions;
+using System.Web.Mvc;
+using Cafe.Commands.Tab;
+using Cafe.Events.Tab;
+using Cafe.Web.ActionFilters;
+using Cafe.Web.Models;
 
-namespace WebFrontend.Controllers
+namespace Cafe.Web.Controllers
 {
     [IncludeLayoutData]
     public class TabController : Controller
@@ -23,9 +23,9 @@ namespace WebFrontend.Controllers
         {
             cmd.Id = Guid.NewGuid();
             Domain.Dispatcher.SendCommand(cmd);
-            return RedirectToAction("Order", new { id = cmd.TableNumber });
+            return RedirectToAction("Order", new {id = cmd.TableNumber});
         }
-        
+
         public ActionResult Status(int id)
         {
             return View(Domain.OpenTabQueries.TabForTable(id));
@@ -34,41 +34,44 @@ namespace WebFrontend.Controllers
         public ActionResult Order(int id)
         {
             return View(new OrderModel
-            {
-                Items = (from item in StaticData.Menu
-                         select new OrderModel.OrderItem
-                         {
-                             MenuNumber = item.MenuNumber,
-                             Description = item.Description,
-                             NumberToOrder = 0
-                         }).ToList(),
-            });
+                        {
+                            Items = (from item in StaticData.Menu
+                                     select new OrderModel.OrderItem
+                                            {
+                                                MenuNumber = item.MenuNumber,
+                                                Description = item.Description,
+                                                NumberToOrder = 0
+                                            }).ToList(),
+                        });
         }
 
         [HttpPost]
         public ActionResult Order(int id, OrderModel order)
         {
-            var items = new List<Events.Cafe.OrderedItem>();
+            var items = new List<OrderedItem>();
             var menuLookup = StaticData.Menu.ToDictionary(k => k.MenuNumber, v => v);
             foreach (var item in order.Items)
-                for (int i = 0; i < item.NumberToOrder; i++)
-                    items.Add(new Events.Cafe.OrderedItem
-                    {
-                        MenuNumber = item.MenuNumber,
-                        Description = menuLookup[item.MenuNumber].Description,
-                        Price = menuLookup[item.MenuNumber].Price,
-                        IsDrink = menuLookup[item.MenuNumber].IsDrink
-                    });
-            
-            Domain.Dispatcher.SendCommand(new PlaceOrder
             {
-                Id = Domain.OpenTabQueries.TabIdForTable(id),
-                Items = items
-            });
+                for (int i = 0; i < item.NumberToOrder; i++)
+                {
+                    items.Add(new OrderedItem
+                              {
+                                  MenuNumber = item.MenuNumber,
+                                  Description = menuLookup[item.MenuNumber].Description,
+                                  Price = menuLookup[item.MenuNumber].Price,
+                                  IsDrink = menuLookup[item.MenuNumber].IsDrink
+                              });
+                }
+            }
 
-            return RedirectToAction("Status", new { id = id });
+            Domain.Dispatcher.SendCommand(new PlaceOrder
+                                          {
+                                              Id = Domain.OpenTabQueries.TabIdForTable(id),
+                                              Items = items
+                                          });
+
+            return RedirectToAction("Status", new {id = id});
         }
-
 
         public ActionResult MarkServed(int id, FormCollection form)
         {
@@ -81,25 +84,28 @@ namespace WebFrontend.Controllers
                               ).ToList();
 
             var menuLookup = StaticData.Menu.ToDictionary(k => k.MenuNumber, v => v);
-            
+
             var drinks = menuNumbers.Where(n => menuLookup[n].IsDrink).ToList();
             if (drinks.Any())
+            {
                 Domain.Dispatcher.SendCommand(new MarkDrinksServed
-                {
-                    Id = tabId,
-                    MenuNumbers = drinks
-                });
+                                              {
+                                                  Id = tabId,
+                                                  MenuNumbers = drinks
+                                              });
+            }
 
             var food = menuNumbers.Where(n => !menuLookup[n].IsDrink).ToList();
             if (food.Any())
+            {
                 Domain.Dispatcher.SendCommand(new MarkFoodServed
-                {
-                    Id = tabId,
-                    MenuNumbers = food
-                });
+                                              {
+                                                  Id = tabId,
+                                                  MenuNumbers = food
+                                              });
+            }
 
-            return RedirectToAction("Status", new { id = id });
+            return RedirectToAction("Status", new {id = id});
         }
-
     }
 }

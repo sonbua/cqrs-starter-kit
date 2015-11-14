@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Cafe.Tab;
 using System.Text.RegularExpressions;
-using WebFrontend.ActionFilters;
+using System.Web.Mvc;
+using Cafe.Commands.Tab;
+using Cafe.Web.ActionFilters;
 
-namespace WebFrontend.Controllers
+namespace Cafe.Web.Controllers
 {
     [IncludeLayoutData]
     public class ChefController : Controller

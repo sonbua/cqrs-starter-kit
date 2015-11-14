@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using WebFrontend.ActionFilters;
+﻿using System.Web.Mvc;
+using Cafe.Web.ActionFilters;
 
-namespace WebFrontend.Controllers
+namespace Cafe.Web.Controllers
 {
     [IncludeLayoutData]
     public class WaitStaffController : Controller
@@ -13,6 +9,7 @@ namespace WebFrontend.Controllers
         public ActionResult Todo(string id)
         {
             ViewBag.Waiter = id;
+
             return View(Domain.OpenTabQueries.TodoListForWaiter(id));
         }
     }

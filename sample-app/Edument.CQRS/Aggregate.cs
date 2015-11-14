@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
 
-namespace Edument.CQRS
+namespace Cafe.Core
 {
     /// <summary>
     /// Aggregate base class, which factors out some common infrastructure that
@@ -17,36 +14,41 @@ namespace Edument.CQRS
         /// </summary>
         public int EventsLoaded { get; private set; }
 
+        // TODO: make set non-public
         /// <summary>
         /// The unique ID of the aggregate.
         /// </summary>
-        public Guid Id { get; internal set; }
+        public Guid Id { get; set; }
 
         /// <summary>
-        /// Enuerates the supplied events and applies them in order to the aggregate.
+        /// Enumerates the supplied events and applies them in order to the aggregate.
         /// </summary>
         /// <param name="events"></param>
         public void ApplyEvents(IEnumerable events)
         {
-            foreach (var e in events)
+            foreach (var @event in events)
+            {
                 GetType().GetMethod("ApplyOneEvent")
-                    .MakeGenericMethod(e.GetType())
-                    .Invoke(this, new object[] { e });
+                         .MakeGenericMethod(@event.GetType())
+                         .Invoke(this, new object[] {@event});
+            }
         }
 
         /// <summary>
         /// Applies a single event to the aggregate.
         /// </summary>
         /// <typeparam name="TEvent"></typeparam>
-        /// <param name="ev"></param>
-        public void ApplyOneEvent<TEvent>(TEvent ev)
+        /// <param name="event"></param>
+        public void ApplyOneEvent<TEvent>(TEvent @event)
         {
             var applier = this as IApplyEvent<TEvent>;
+
             if (applier == null)
-                throw new InvalidOperationException(string.Format(
-                    "Aggregate {0} does not know how to apply event {1}",
-                    GetType().Name, ev.GetType().Name));
-            applier.Apply(ev);
+            {
+                throw new InvalidOperationException($"Aggregate {GetType().Name} does not know how to apply event {@event.GetType().Name}");
+            }
+
+            applier.Apply(@event);
             EventsLoaded++;
         }
     }

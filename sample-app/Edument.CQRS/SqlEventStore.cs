@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
-using System.Data.SqlClient;
 using System.Data;
-using System.Xml.Serialization;
+using System.Data.SqlClient;
 using System.IO;
+using System.Text;
+using System.Xml.Serialization;
 
-namespace Edument.CQRS
+namespace Cafe.Core
 {
     /// <summary>
     /// This is a simple example implementation of an event store, using a SQL database
@@ -16,16 +14,16 @@ namespace Edument.CQRS
     /// </summary>
     public class SqlEventStore : IEventStore
     {
-        private string connectionString;
+        private readonly string _connectionString;
 
         public SqlEventStore(string connectionString)
         {
-            this.connectionString = connectionString;
+            _connectionString = connectionString;
         }
 
         public IEnumerable LoadEventsFor<TAggregate>(Guid id)
         {
-            using (var con = new SqlConnection(connectionString))
+            using (var con = new SqlConnection(_connectionString))
             {
                 con.Open();
                 using (var cmd = new SqlCommand())
@@ -87,7 +85,7 @@ namespace Edument.CQRS
                 queryText.Append("COMMIT;");
 
                 // Execute the update.
-                using (var con = new SqlConnection(connectionString))
+                using (var con = new SqlConnection(_connectionString))
                 {
                     con.Open();
                     cmd.Connection = con;

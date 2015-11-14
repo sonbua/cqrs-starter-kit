@@ -1,64 +1,68 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Edument.CQRS;
-using Events.Cafe;
+using Cafe.Core;
+using Cafe.Events.Tab;
 
-namespace Cafe.Tab
+namespace Cafe.Commands.Tab
 {
     public class TabAggregate : Aggregate,
-        IHandleCommand<OpenTab>,
-        IHandleCommand<PlaceOrder>,
-        IHandleCommand<MarkDrinksServed>,
-        IHandleCommand<MarkFoodPrepared>,
-        IHandleCommand<MarkFoodServed>,
-        IHandleCommand<CloseTab>,
-        IApplyEvent<TabOpened>,
-        IApplyEvent<DrinksOrdered>,
-        IApplyEvent<FoodOrdered>,
-        IApplyEvent<DrinksServed>,
-        IApplyEvent<FoodPrepared>,
-        IApplyEvent<FoodServed>,
-        IApplyEvent<TabClosed>
+                                IHandleCommand<OpenTab>,
+                                IHandleCommand<PlaceOrder>,
+                                IHandleCommand<MarkDrinksServed>,
+                                IHandleCommand<MarkFoodPrepared>,
+                                IHandleCommand<MarkFoodServed>,
+                                IHandleCommand<CloseTab>,
+                                IApplyEvent<TabOpened>,
+                                IApplyEvent<DrinksOrdered>,
+                                IApplyEvent<FoodOrdered>,
+                                IApplyEvent<DrinksServed>,
+                                IApplyEvent<FoodPrepared>,
+                                IApplyEvent<FoodServed>,
+                                IApplyEvent<TabClosed>
     {
-        private List<OrderedItem> outstandingDrinks = new List<OrderedItem>();
-        private List<OrderedItem> outstandingFood = new List<OrderedItem>();
-        private List<OrderedItem> preparedFood = new List<OrderedItem>();
-        private bool open;
-        private decimal servedItemsValue;
+        private readonly List<OrderedItem> _outstandingDrinks = new List<OrderedItem>();
+        private readonly List<OrderedItem> _outstandingFood = new List<OrderedItem>();
+        private readonly List<OrderedItem> _preparedFood = new List<OrderedItem>();
+        private bool _open;
+        private decimal _servedItemsValue;
 
         public IEnumerable Handle(OpenTab c)
         {
             yield return new TabOpened
-            {
-                Id = c.Id,
-                TableNumber = c.TableNumber,
-                Waiter = c.Waiter
-            };
+                         {
+                             Id = c.Id,
+                             TableNumber = c.TableNumber,
+                             Waiter = c.Waiter
+                         };
         }
 
         public IEnumerable Handle(PlaceOrder c)
         {
-            if (!open)
+            if (!_open)
+            {
                 throw new TabNotOpen();
+            }
 
             var drink = c.Items.Where(i => i.IsDrink).ToList();
             if (drink.Any())
+            {
                 yield return new DrinksOrdered
-                {
-                    Id = c.Id,
-                    Items = drink
-                };
+                             {
+                                 Id = c.Id,
+                                 Items = drink
+                             };
+            }
 
             var food = c.Items.Where(i => !i.IsDrink).ToList();
             if (food.Any())
+            {
                 yield return new FoodOrdered
-                {
-                    Id = c.Id,
-                    Items = food
-                };
+                             {
+                                 Id = c.Id,
+                                 Items = food
+                             };
+            }
         }
 
         public IEnumerable Handle(MarkDrinksServed c)
@@ -99,35 +103,35 @@ namespace Cafe.Tab
 
         public IEnumerable Handle(CloseTab c)
         {
-            if (!open)
+            if (!_open)
                 throw new TabNotOpen();
             if (HasUnservedItems())
                 throw new TabHasUnservedItems();
-            if (c.AmountPaid < servedItemsValue)
+            if (c.AmountPaid < _servedItemsValue)
                 throw new MustPayEnough();
 
             yield return new TabClosed
             {
                 Id = c.Id,
                 AmountPaid = c.AmountPaid,
-                OrderValue = servedItemsValue,
-                TipValue = c.AmountPaid - servedItemsValue
+                OrderValue = _servedItemsValue,
+                TipValue = c.AmountPaid - _servedItemsValue
             };
         }
 
         private bool AreDrinksOutstanding(List<int> menuNumbers)
         {
-            return AreAllInList(want: menuNumbers, have: outstandingDrinks);
+            return AreAllInList(want: menuNumbers, have: _outstandingDrinks);
         }
 
         private bool IsFoodOutstanding(List<int> menuNumbers)
         {
-            return AreAllInList(want: menuNumbers, have: outstandingFood);
+            return AreAllInList(want: menuNumbers, have: _outstandingFood);
         }
 
         private bool IsFoodPrepared(List<int> menuNumbers)
         {
-            return AreAllInList(want: menuNumbers, have: preparedFood);
+            return AreAllInList(want: menuNumbers, have: _preparedFood);
         }
 
         private static bool AreAllInList(List<int> want, List<OrderedItem> have)
@@ -143,31 +147,31 @@ namespace Cafe.Tab
 
         public bool HasUnservedItems()
         {
-            return outstandingDrinks.Any() || outstandingFood.Any() || preparedFood.Any();
+            return _outstandingDrinks.Any() || _outstandingFood.Any() || _preparedFood.Any();
         }
 
         public void Apply(TabOpened e)
         {
-            open = true;
+            _open = true;
         }
 
         public void Apply(DrinksOrdered e)
         {
-            outstandingDrinks.AddRange(e.Items);
+            _outstandingDrinks.AddRange(e.Items);
         }
 
         public void Apply(FoodOrdered e)
         {
-            outstandingFood.AddRange(e.Items);
+            _outstandingFood.AddRange(e.Items);
         }
 
         public void Apply(DrinksServed e)
         {
             foreach (var num in e.MenuNumbers)
             {
-                var item = outstandingDrinks.First(d => d.MenuNumber == num);
-                outstandingDrinks.Remove(item);
-                servedItemsValue += item.Price;
+                var item = _outstandingDrinks.First(d => d.MenuNumber == num);
+                _outstandingDrinks.Remove(item);
+                _servedItemsValue += item.Price;
             }
         }
 
@@ -175,9 +179,9 @@ namespace Cafe.Tab
         {
             foreach (var num in e.MenuNumbers)
             {
-                var item = outstandingFood.First(f => f.MenuNumber == num);
-                outstandingFood.Remove(item);
-                preparedFood.Add(item);
+                var item = _outstandingFood.First(f => f.MenuNumber == num);
+                _outstandingFood.Remove(item);
+                _preparedFood.Add(item);
             }
         }
 
@@ -185,15 +189,15 @@ namespace Cafe.Tab
         {
             foreach (var num in e.MenuNumbers)
             {
-                var item = preparedFood.First(f => f.MenuNumber == num);
-                preparedFood.Remove(item);
-                servedItemsValue += item.Price;
+                var item = _preparedFood.First(f => f.MenuNumber == num);
+                _preparedFood.Remove(item);
+                _servedItemsValue += item.Price;
             }
         }
 
         public void Apply(TabClosed e)
         {
-            open = false;
+            _open = false;
         }
     }
 }
