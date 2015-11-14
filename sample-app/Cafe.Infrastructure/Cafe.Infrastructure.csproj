@@ -53,7 +53,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Edument.CQRS\Cafe.Core.csproj">
+    <ProjectReference Include="..\Cafe.Core\Cafe.Core.csproj">
       <Project>{d2bab57d-225d-4f4c-9410-ed39495a8fe0}</Project>
       <Name>Cafe.Core</Name>
     </ProjectReference>

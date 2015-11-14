@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Web", "WebFrontend\Cafe.Web.csproj", "{F6A1718E-58B6-4A8A-A13D-ECE49DD75538}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Web", "Cafe.Web\Cafe.Web.csproj", "{F6A1718E-58B6-4A8A-A13D-ECE49DD75538}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Core", "Edument.CQRS\Cafe.Core.csproj", "{D2BAB57D-225D-4F4C-9410-ED39495A8FE0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Core", "Cafe.Core\Cafe.Core.csproj", "{D2BAB57D-225D-4F4C-9410-ED39495A8FE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Events", "Events\Cafe.Events.csproj", "{36635EE7-A3B5-4F39-8AF8-3625F6BBE43D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Events", "Cafe.Events\Cafe.Events.csproj", "{36635EE7-A3B5-4F39-8AF8-3625F6BBE43D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Commands", "Cafe\Cafe.Commands.csproj", "{93C9E435-6BF0-4A40-98FA-2BDFFF04F506}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Commands", "Cafe.Commands\Cafe.Commands.csproj", "{93C9E435-6BF0-4A40-98FA-2BDFFF04F506}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Tests", "CafeTests\Cafe.Tests.csproj", "{FE7E5277-0F2B-4CC8-81B7-87AB78AF0D18}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Tests", "Cafe.Tests\Cafe.Tests.csproj", "{FE7E5277-0F2B-4CC8-81B7-87AB78AF0D18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.ReadModels", "CafeReadModels\Cafe.ReadModels.csproj", "{6F605353-EDF1-4EC1-900C-4C55C105E24C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.ReadModels", "Cafe.ReadModels\Cafe.ReadModels.csproj", "{6F605353-EDF1-4EC1-900C-4C55C105E24C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cafe.Infrastructure", "Cafe.Infrastructure\Cafe.Infrastructure.csproj", "{F403E01D-1FA6-4929-8F3E-FF913862290D}"
 EndProject
