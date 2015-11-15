@@ -46,11 +46,11 @@
     <Compile Include="Tab\TabAggregate.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Edument.CQRS\Cafe.Core.csproj">
+    <ProjectReference Include="..\Cafe.Core\Cafe.Core.csproj">
       <Project>{D2BAB57D-225D-4F4C-9410-ED39495A8FE0}</Project>
       <Name>Cafe.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Events\Cafe.Events.csproj">
+    <ProjectReference Include="..\Cafe.Events\Cafe.Events.csproj">
       <Project>{36635EE7-A3B5-4F39-8AF8-3625F6BBE43D}</Project>
       <Name>Cafe.Events</Name>
     </ProjectReference>
